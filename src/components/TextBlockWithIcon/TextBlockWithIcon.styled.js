@@ -25,11 +25,10 @@ export const Icon = styled.div`
   width: 50px;
   height: 50px;
   margin-right: 24px;
-`;
-
-export const Image = styled.img`
-  display: block;
-  max-width: 100%;
+  > svg {
+    display: block;
+    max-width: 100%;
+  }
 `;
 
 export const Title = styled.h3`
@@ -50,5 +49,13 @@ export const Description = styled.div`
   color: ${Color.black};
   > * {
     display: inline;
+  }
+  > a {
+    font-weight: 700;
+  }
+  > .trans-route {
+    font-weight: 700;
+    color: ${Color.primary};
+    text-decoration: none;
   }
 `;

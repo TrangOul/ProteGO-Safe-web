@@ -1,9 +1,8 @@
+import moment from 'moment';
 import * as types from '../types/app';
-import {
-  changeNativeLanguage,
-  resetSourceSetServicesStatus
-} from './nativeData';
+import { changeNativeLanguage, resetSourceSetServicesStatus } from './nativeData';
 import nativeBridge from '../../services/nativeBridge';
+import { getTimestamp } from '../../utils/date';
 
 export const onboardingFinished = () => ({
   type: types.ONBOARDING_FINISHED
@@ -130,12 +129,40 @@ export const fetchFontScale = () => {
   };
 };
 
-export const restrictionsModalShowed = () => ({
-  type: types.RESTRICTIONS_MODAL_SHOWED
+export const warningInEuropeTermToggle = () => ({
+  type: types.WARNING_IN_EUROPE_TERM_TOGGLE
 });
 
-export const hideRestrictionsModal = () => {
+export const firstRun = data => ({
+  data,
+  type: types.FIRST_RUN
+});
+
+export const markFirstRun = () => {
+  const timestamp = moment().unix();
   return dispatch => {
-    dispatch(restrictionsModalShowed());
+    dispatch(firstRun({ timestamp }));
   };
+};
+
+export const applicationRated = data => ({
+  data,
+  type: types.APPLICATION_RATED
+});
+
+export const rateApplication = liked => async dispatch => {
+  dispatch(applicationRated({ liked }));
+  if (liked) {
+    nativeBridge.rateApp();
+  }
+};
+
+export const setShowingRateApplication = timestamp => ({
+  data: { timestamp },
+  type: types.SHOWING_RATE_APPLICATION_SET
+});
+
+export const rateApplicationShowed = () => async dispatch => {
+  const timestamp = getTimestamp();
+  dispatch({ data: { timestamp }, type: types.RATE_APPLICATION_SHOWED });
 };

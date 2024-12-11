@@ -1,5 +1,4 @@
 import React from 'react';
-import Scrollbar from 'react-scrollbars-custom';
 import { useSelector } from 'react-redux';
 import { Layout } from '../../components';
 import { ImportantInfoItem } from './components';
@@ -10,27 +9,14 @@ const ImportantInfo = ({ items }) => {
   const fontScale = useSelector(getFontScale);
   const windowWidth = window.innerWidth;
 
-  const changeView = windowWidth < 375 || fontScale > 1;
+  const changeView = windowWidth < 375 || fontScale > 1 ? 1 : 0;
 
-  const stylesScrollbar = {
-    width: '100%',
-    height: '100%'
-  };
+  const renderItems = items.map((item, key) => {
+    const { danger, description, icon, link, newFeature, path, title, type } = item;
 
-  const renderItems = items.map(item => {
-    const {
-      danger,
-      description,
-      icon,
-      link,
-      newFeature,
-      path,
-      title,
-      type
-    } = item;
     return (
       <ImportantInfoItem
-        key={title}
+        key={key}
         danger={danger}
         description={description}
         icon={icon}
@@ -38,23 +24,15 @@ const ImportantInfo = ({ items }) => {
         path={path}
         title={title}
         type={type}
-        size={changeView}
+        isSmallDevice={changeView}
         newFeature={newFeature}
       />
     );
   });
 
   return (
-    <Layout isNavigation noMargin noPadding>
-      <Styled.Container change={changeView}>
-        {changeView ? (
-          <Scrollbar scrollbarWidth={6} style={stylesScrollbar}>
-            {renderItems}
-          </Scrollbar>
-        ) : (
-          renderItems
-        )}
-      </Styled.Container>
+    <Layout isNavigation noMargin noPadding hideBackButton>
+      <Styled.Container size={changeView}>{renderItems}</Styled.Container>
     </Layout>
   );
 };

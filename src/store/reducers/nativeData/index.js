@@ -1,81 +1,66 @@
-import {
-  NATIVE_DATA_SET_SERVICE_STATUS_SOURCE_RESETED,
-  NATIVE_DATA_FETCH_NOTIFICATION_SUCCESS,
-  NATIVE_DATA_FETCH_SERVICES_STATUS_SUCCESS,
-  NATIVE_DATA_HIDE_NOTIFICATION_SUCCESS,
-  NATIVE_DATA_SET_SERVICES_STATUS_SUCCESS,
-  NATIVE_DATA_FETCH_EXPOSURE_NOTIFICATION_STATISTICS_SUCCESS,
-  NATIVE_DATA_FETCH_NATIVE_STATE,
-  FETCH_VERSION_SUCCESS,
-  FETCH_LANGUAGE
-} from '../../types/nativeData';
+import moment from 'moment';
+import * as types from '../../types/nativeData';
 
 const INITIAL_STATE = {
   riskLevel: undefined,
-  notification: undefined,
   servicesStatus: {},
   servicesStatusSetByNative: false,
   version: undefined,
-  language: undefined
+  language: undefined,
+  labTest: {
+    subscription: undefined,
+    subscriptionUpdated: undefined,
+    pinUnsuccessfulAttempts: [],
+  }
 };
 
-const setServicesStatusSuccess = (
-  state,
-  { servicesStatus = {} },
-  servicesStatusSetByNative
-) => {
+const setServicesStatusSuccess = (state, { servicesStatus: newServicesStatus = {} }, servicesStatusSetByNative) => {
+  const { servicesStatus: currentServicesStatus = {} } = state;
+  const { receivedServicesStatusMarker = 0 } = currentServicesStatus;
+  const { servicesStatus } = newServicesStatus;
   return {
     ...state,
-    ...servicesStatus,
+    servicesStatus: { ...servicesStatus, receivedServicesStatusMarker: receivedServicesStatusMarker + 1 },
     servicesStatusSetByNative
   };
 };
 
+const resolvePinUnsuccessfulAttempts = (state, result) => {
+  const { labTest } = state;
+  if (!labTest) {
+    return [];
+  }
+  const { pinUnsuccessfulAttempts = [] } = labTest;
+  if (result === 1) {
+    return [];
+  }
+  if (result === 2) {
+    return [...pinUnsuccessfulAttempts, new Date().getTime()];
+  }
+  return [...pinUnsuccessfulAttempts];
+};
+
 const nativeBridgeReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
-    case NATIVE_DATA_FETCH_NOTIFICATION_SUCCESS:
-      return (() => {
-        const {
-          notification: { title, content, status }
-        } = action;
-        return {
-          ...state,
-          notification: {
-            title,
-            content,
-            status
-          }
-        };
-      })();
-    case NATIVE_DATA_HIDE_NOTIFICATION_SUCCESS:
-      return {
-        ...state,
-        notification: undefined
-      };
-    case NATIVE_DATA_FETCH_SERVICES_STATUS_SUCCESS:
+    case types.NATIVE_DATA_FETCH_SERVICES_STATUS_SUCCESS:
       return setServicesStatusSuccess(state, action, false);
-    case NATIVE_DATA_SET_SERVICES_STATUS_SUCCESS:
+    case types.NATIVE_DATA_SET_SERVICES_STATUS_SUCCESS:
       return setServicesStatusSuccess(state, action, true);
-    case NATIVE_DATA_SET_SERVICE_STATUS_SOURCE_RESETED:
+    case types.NATIVE_DATA_SET_SERVICE_STATUS_SOURCE_RESETED:
       return {
         ...state,
         servicesStatusSetByNative: false
       };
-    case NATIVE_DATA_FETCH_EXPOSURE_NOTIFICATION_STATISTICS_SUCCESS: {
-      const { riskLevel } = action;
+    case types.EN_STATUS_RECEIVED: {
+      const {
+        data: { riskLevel }
+      } = action;
       return {
         ...state,
-        ...riskLevel
+        riskLevel
       };
     }
-    case NATIVE_DATA_FETCH_NATIVE_STATE: {
-      const { appState } = action;
-      return {
-        ...state,
-        ...appState
-      };
-    }
-    case FETCH_VERSION_SUCCESS: {
+    case types.FETCH_VERSION_SUCCESS: {
       const {
         body: { appVersion }
       } = action;
@@ -84,13 +69,39 @@ const nativeBridgeReducer = (state = INITIAL_STATE, action) => {
         version: appVersion
       };
     }
-    case FETCH_LANGUAGE: {
+    case types.FETCH_LANGUAGE: {
       const {
         body: { language }
       } = action;
       return {
         ...state,
         language: language.toLowerCase()
+      };
+    }
+    case types.UPLOAD_LAB_TEST_PIN_FINISHED: {
+      const {
+        body: { result }
+      } = action;
+      const { labTest } = state;
+
+      const pinUnsuccessfulAttempts = resolvePinUnsuccessfulAttempts(state, result);
+
+      return {
+        ...state,
+        labTest: {
+          ...labTest,
+          pinUnsuccessfulAttempts
+        }
+      };
+    }
+    case types.FETCH_LAB_TEST_SUBSCRIPTION: {
+      const {
+        body: { subscription }
+      } = action;
+      const { labTest } = state;
+      return {
+        ...state,
+        labTest: { ...labTest, subscription, subscriptionUpdated: moment().unix() }
       };
     }
     default:

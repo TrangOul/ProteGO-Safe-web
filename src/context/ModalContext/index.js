@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Modal } from '../../components';
+import { TYPE } from '../../components/Modal/Modal.helpers';
 
 const ModalContext = createContext(null);
 
@@ -12,13 +13,40 @@ export const ModalProvider = ({ children }) => {
   const [modal, setModal] = useState(false);
   const [title, setTitle] = useState(null);
   const [type, setType] = useState('');
+  const [callback, setCallback] = useState(undefined);
+  const [disableOverlayClose, setDisableOverlayClose] = useState(false);
+  const [hideCloseButton, setHideCloseButton] = useState(false);
 
-  const onClose = () => setContent(null);
-  const openModal = (value, modalType, modalTitle, modalFooter) => {
+  const onClose = () => {
+    setModal(false);
+    if (callback) {
+      callback();
+    }
+
+    const timer = setTimeout(() => {
+      setTitle(null);
+      setContent(null);
+      setFooter(null);
+    }, 400);
+    return () => clearTimeout(timer);
+  };
+
+  const openModal = ({
+    value,
+    modalType,
+    modalTitle,
+    modalFooter,
+    closeCallback,
+    disableOverlayClose,
+    hideCloseButton
+  }) => {
     setContent(value || EMPTY_MODAL_CONTENT);
-    setType(modalType || 'normal');
+    setType(modalType || TYPE.DEFAULT);
     setTitle(modalTitle || null);
     setFooter(modalFooter || null);
+    setCallback(() => closeCallback || undefined);
+    setDisableOverlayClose(disableOverlayClose || false);
+    setHideCloseButton(hideCloseButton || false);
   };
 
   useEffect(() => {
@@ -38,7 +66,7 @@ export const ModalProvider = ({ children }) => {
       }}
     >
       {children}
-      {modal && <Modal />}
+      <Modal disableOverlayClose={disableOverlayClose} hideCloseButton={hideCloseButton} open={modal} />
     </ModalContext.Provider>
   );
 };

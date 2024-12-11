@@ -1,32 +1,59 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withTranslation } from 'react-i18next';
-import Routes from '../../routes';
-import * as Styled from './FollowDistrictsSlider.styled';
 import { StatusItem } from '../../components/StatusItem';
+import { NavLink, T } from '../../components';
+import { Routes } from '../../services/navigationService/routes';
+import * as Styled from './FollowDistrictsSlider.styled';
 
-const FollowDistrictsSlider = ({ items, t }) => {
+import { ReactComponent as IconAdd } from '../../assets/img/icons/plus.svg';
+import { ReactComponent as IconMap } from '../../assets/img/icons/mapa-pl.svg';
+
+const FollowDistrictsSlider = ({ items }) => {
   const renderItems = items.map(({ id, name, state }) => (
-    <StatusItem id={id} key={id} name={name} status={state} />
+    <StatusItem isShadow id={id} key={id} name={name} status={state} />
   ));
 
   return (
-    <Styled.FollowDistrictsSlider padding={items.length === 0}>
+    <Styled.Wrapper>
       {items.length > 0 ? (
         <>
-          <Styled.Title to={Routes.CurrentRestrictions}>
-            {t('follow_district_title')}:{' '}
-            <Styled.Badge>{items.length}</Styled.Badge>
-          </Styled.Title>
+          <Styled.Head>
+            <Styled.IconTitle>
+              <IconMap />
+            </Styled.IconTitle>
+            <Styled.Title>
+              <T i18nKey="district_text_1" />
+            </Styled.Title>
+          </Styled.Head>
+
           <Styled.Slider>{renderItems}</Styled.Slider>
+
+          <Styled.ButtonWrapper>
+            <NavLink to={Routes.CurrentRestrictions}>
+              <Styled.Add>
+                <IconAdd />
+                <T i18nKey="district_text_2" />
+              </Styled.Add>
+            </NavLink>
+          </Styled.ButtonWrapper>
         </>
       ) : (
-        <Styled.Button to={Routes.CurrentRestrictions}>
-          {t('follow_district_button_name')}
-          <Styled.Icon />
-        </Styled.Button>
+        <NavLink to={Routes.CurrentRestrictions}>
+          <Styled.Button>
+            <Styled.Head>
+              <Styled.IconTitle>
+                <IconMap />
+              </Styled.IconTitle>
+              <Styled.Title primary>
+                <T i18nKey="district_text_3" />
+              </Styled.Title>
+            </Styled.Head>
+
+            <Styled.Icon />
+          </Styled.Button>
+        </NavLink>
       )}
-    </Styled.FollowDistrictsSlider>
+    </Styled.Wrapper>
   );
 };
 
@@ -35,7 +62,13 @@ FollowDistrictsSlider.defaultProps = {
 };
 
 FollowDistrictsSlider.propTypes = {
-  items: PropTypes.array
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      name: PropTypes.string,
+      state: PropTypes.number
+    })
+  )
 };
 
-export default withTranslation()(FollowDistrictsSlider);
+export default FollowDistrictsSlider;

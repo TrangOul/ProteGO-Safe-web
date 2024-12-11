@@ -12,7 +12,7 @@ export const WarningWrapper = styled.div`
   display: flex;
   flex-flow: wrap row;
   width: 100%;
-  margin-top: 22px;
+  margin-bottom: 18px;
   padding: 12px 24px 12px 8px;
   border-radius: 4px;
   border-style: solid;
@@ -65,7 +65,7 @@ export const Content = styled.p`
   width: calc(100% - 32px);
   margin-top: 9px;
   margin-left: 30px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.36;
   font-weight: ${FontWeight.Normal};
   color: ${colorFont(Color.lightBlack)};

@@ -1,17 +1,18 @@
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Version, VersionAppWrapper } from './VersionApp.styled';
+import { T } from '../index';
+import * as Styled from './VersionApp.styled';
 
-const VersionApp = ({ t }) => {
+const VersionApp = () => {
   const { version } = useSelector(state => state.nativeData);
+
   return (
-    <VersionAppWrapper>
-      <Version>
-        {t('version_app_text1')}:{version}
-      </Version>
-    </VersionAppWrapper>
+    <Styled.VersionAppWrapper>
+      <Styled.Version>
+        <T i18nKey="version_app_text1" />: {version}
+      </Styled.Version>
+    </Styled.VersionAppWrapper>
   );
 };
 
-export default withTranslation()(VersionApp);
+export default VersionApp;

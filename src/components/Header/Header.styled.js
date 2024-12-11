@@ -6,22 +6,20 @@ import { ReactComponent as LogoSVG } from '../../assets/img/logo/stopcovid_prote
 import { ReactComponent as ArrowIcon } from '../../assets/img/icons/angle-left.svg';
 
 export const Container = styled.header`
-  height: 50px;
-  background-color: #0052a5;
-  width: 100%;
-  padding: 0 14px;
+  position: relative;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  height: 52px;
+  width: 100vw;
+  padding: 0 14px;
+  background-color: ${Color.primary};
   transition: all 0.2s ease-in;
-
-  @media (max-width: 300px) {
-    height: 40px;
-  }
+  z-index: 600;
 `;
 
 export const Logo = styled(LogoSVG)`
-  height: 30px;
+  height: 38px;
   width: auto;
 `;
 
@@ -30,7 +28,7 @@ const Button = styled.div`
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #ffffff;
+  color: ${Color.white};
   cursor: pointer;
   appearance: none;
   @media (max-width: 300px) {
@@ -49,9 +47,8 @@ export const Arrow = styled(ArrowIcon)`
   margin-right: 10px;
 `;
 
-export const Title = styled.p`
-  margin-right: ${({ titlePosition }) =>
-    titlePosition === 'left' ? 'auto' : 0};
+export const Title = styled.p` 
+  margin-right: ${({ titlePosition }) => (titlePosition === 'left' ? 'auto' : 0)};
   color: ${Color.white};
   font-size: 18px;
   font-weight: ${FontWeight.Normal}

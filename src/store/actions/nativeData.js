@@ -1,10 +1,7 @@
 import moment from 'moment';
 import nativeBridge from '../../services/nativeBridge';
 import * as types from '../types/nativeData';
-import {
-  UPLOAD_HISTORICAL_DATA_ENDED,
-  UPLOAD_HISTORICAL_DATA_REQUESTED
-} from '../types/app';
+import { UPLOAD_HISTORICAL_DATA_ENDED, UPLOAD_HISTORICAL_DATA_REQUESTED } from '../types/app';
 
 export function saveInfoAboutFilledDiagnosis() {
   const timestamp = moment().unix();
@@ -14,27 +11,12 @@ export function saveInfoAboutFilledDiagnosis() {
   };
 }
 
-export const fetchNotificationSuccess = notification => ({
-  notification,
-  type: types.NATIVE_DATA_FETCH_NOTIFICATION_SUCCESS
-});
-
-export function fetchNotification() {
-  return dispatch => {
-    nativeBridge.getNotification().then(notification => {
-      if (notification) {
-        dispatch(fetchNotificationSuccess(notification));
-      }
-    });
-  };
-}
-
 export const fetchServicesStatusSuccess = servicesStatus => ({
   servicesStatus,
   type: types.NATIVE_DATA_FETCH_SERVICES_STATUS_SUCCESS
 });
 
-export function fetchServicesStatus() {
+export const fetchServicesStatus = () => {
   return dispatch => {
     nativeBridge.getServicesStatus().then(servicesStatus => {
       if (servicesStatus) {
@@ -44,28 +26,19 @@ export function fetchServicesStatus() {
   };
 }
 
-export const fetchExposureNotificationStatisticsSuccess = riskLevel => ({
-  riskLevel,
-  type: types.NATIVE_DATA_FETCH_EXPOSURE_NOTIFICATION_STATISTICS_SUCCESS
+export const enStatusReceived = riskLevel => ({
+  data: { riskLevel },
+  type: types.EN_STATUS_RECEIVED
 });
 
 export function fetchExposureNotificationStatistics() {
   return dispatch => {
-    nativeBridge.getExposureNotificationStatistics().then(riskLevel => {
-      if (riskLevel) {
-        dispatch(fetchExposureNotificationStatisticsSuccess(riskLevel));
+    nativeBridge.getExposureNotificationStatistics().then(data => {
+      if (data) {
+        const { riskLevel } = data;
+        dispatch(enStatusReceived(riskLevel));
       }
     });
-  };
-}
-
-export const hideNotificationSuccess = () => ({
-  type: types.NATIVE_DATA_HIDE_NOTIFICATION_SUCCESS
-});
-
-export function hideNotification() {
-  return dispatch => {
-    dispatch(hideNotificationSuccess());
   };
 }
 
@@ -101,10 +74,10 @@ export const uploadHistoricalDataRequested = () => ({
   type: UPLOAD_HISTORICAL_DATA_REQUESTED
 });
 
-export function uploadHistoricalData({ pin }) {
+export function uploadHistoricalData(pin, isInteroperabilityEnabled) {
   return dispatch => {
     dispatch(uploadHistoricalDataRequested());
-    nativeBridge.setPin(pin);
+    nativeBridge.uploadHistoricalData({ pin, isInteroperabilityEnabled });
   };
 }
 
@@ -148,6 +121,21 @@ export function fetchLanguage() {
   };
 }
 
+export const fetchLabTestSubscriptionSuccess = body => ({
+  body,
+  type: types.FETCH_LAB_TEST_SUBSCRIPTION
+});
+
+export const fetchLabTestSubscription = () => {
+  return dispatch => {
+    nativeBridge.getLabTestSubscription().then(body => {
+      if (body) {
+        dispatch(fetchLabTestSubscriptionSuccess(body));
+      }
+    });
+  };
+};
+
 export function changeNativeLanguage(language) {
   const data = { language: language.toUpperCase() };
   return () => {
@@ -155,8 +143,24 @@ export function changeNativeLanguage(language) {
   };
 }
 
-export const generateFreeTestCode = () => {
-  return () => {
-    nativeBridge.generateFreeTestCode();
+export const uploadTestPinFinished = body => ({
+  body,
+  type: types.UPLOAD_LAB_TEST_PIN_FINISHED
+});
+
+export const uploadLabTestPin = pin => {
+  return async dispatch => {
+    const result = await nativeBridge.uploadLabTestPin(pin);
+    dispatch(uploadTestPinFinished(result));
+    return result;
+  };
+};
+
+export const revokeEnStatus = () => {
+  return async dispatch => {
+    await nativeBridge.revokeEnStatus().then(data => {
+      const { riskLevel } = data;
+      dispatch(enStatusReceived(riskLevel));
+    });
   };
 };

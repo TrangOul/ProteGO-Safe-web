@@ -108,6 +108,7 @@ export const FIELD_MUSCLE_PAIN = 'musclePain';
 export const FIELD_CONTACTS = 'contacts';
 export const FIELD_SMOKE = 'smoke';
 export const FIELD_SMOKE_NUMBER = 'smokeNumber';
+export const FIELD_MANUAL_COVID = 'manualCovid';
 
 export const VALUE_SYMPTOM_LEVEL_1 = 'level 1';
 export const VALUE_SYMPTOM_LEVEL_2 = 'level 2';
@@ -136,7 +137,31 @@ export const LOGO_COLOR_WHITE = 'white';
 
 // Languages
 export const DEFAULT_LANGUAGE = 'pl';
-export const AVAILABLE_LANGUAGES = { pl: 'pl', en: 'en', uk: 'uk' };
+export const AVAILABLE_LANGUAGES = {
+  pl: 'pl',
+  en: 'en',
+  uk: 'uk',
+  de: 'de',
+  tr: 'tr',
+  ru: 'ru'
+};
 
 export const FAILED = 'FAILED';
 export const SUCCESS = 'SUCCESS';
+
+export const ACTIVITY_TYPE = {
+  NOTIFICATION: 'notification',
+  RISK_CHECK: 'riskCheck',
+  EXPOSURE: 'exposure'
+};
+
+export const STATISTIC_KIND = {
+  CASES: 'cases',
+  DEATHS: 'deaths',
+  DEATHS_CAUSES: 'deathsCauses',
+  DOSES: 'doses',
+  RECOVERED: 'recovered',
+  TESTS: 'tests',
+  UNDESIRABLE_REACTION: 'undesirableReaction',
+  VACCINATIONS: 'vaccinations'
+};

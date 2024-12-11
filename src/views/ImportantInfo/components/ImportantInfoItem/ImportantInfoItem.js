@@ -1,53 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import { NavLink } from 'react-router-dom';
+import React from 'react';
 import { withTranslation } from 'react-i18next';
+import PropTypes from 'prop-types';
 import { TYPES } from './ImportantInfoItem.constants';
+import { NavLink, RippleEffect, T } from '../../../../components';
 import * as Styled from './ImportantInfoItem.styled';
 
-const ImportantInfoItem = ({
-  danger,
-  description,
-  icon,
-  link,
-  newFeature,
-  path,
-  t,
-  size,
-  title,
-  type
-}) => {
-  const ref = useRef(null);
-  const [height, setHeight] = useState(0);
-  const windowWidth = window.innerWidth;
-
-  useEffect(() => {
-    if (ref.current) {
-      const wrapperHeight = ref.current.offsetHeight;
-      setHeight(wrapperHeight);
-    }
-  }, [ref]);
-
+const ImportantInfoItem = ({ danger, description, icon, newFeature, path, isSmallDevice, title, type, t }) => {
   const Content = () => (
-    <Styled.ImportantInfoItem ref={ref} size={size}>
-      {newFeature && <Styled.Badge size={size}>{t('new')}</Styled.Badge>}
-      <Styled.Icon size={size}>{icon}</Styled.Icon>
-      <Styled.Content size={size}>
-        <Styled.Title size={size} danger={danger}>{title}</Styled.Title>
-        {windowWidth < 375 ? (
-          <Styled.Description size={size}>{description}</Styled.Description>
-        ) : (
-          height > 186 && (
-            <Styled.Description size={size}>{description}</Styled.Description>
-          )
-        )}
-      </Styled.Content>
-      {link && (
-        <Styled.LinkGov size={size}>
-          {t('important_info_button_info')}
-        </Styled.LinkGov>
+    <Styled.Wrapper>
+      {newFeature && (
+        <Styled.TopLabel>
+          <T i18nKey="label_new" />
+        </Styled.TopLabel>
       )}
-    </Styled.ImportantInfoItem>
+
+      <Styled.ItemContent size={isSmallDevice}>
+        <Styled.Icon size={isSmallDevice}>{icon}</Styled.Icon>
+
+        <Styled.Title size={isSmallDevice} danger={danger}>
+          {title}
+        </Styled.Title>
+
+        <Styled.Description size={isSmallDevice}>{description}</Styled.Description>
+
+        {type === TYPES.LINK && (
+          <Styled.LinkGov size={isSmallDevice}>
+            <T i18nKey="important_info_button_info" />
+          </Styled.LinkGov>
+        )}
+
+        <RippleEffect />
+      </Styled.ItemContent>
+    </Styled.Wrapper>
   );
 
   switch (type) {
@@ -60,7 +44,7 @@ const ImportantInfoItem = ({
     }
     case TYPES.LINK: {
       return (
-        <Styled.UrlLink href={link} target="_blank">
+        <Styled.UrlLink href={t(path)} target="_blank">
           <Content />
         </Styled.UrlLink>
       );
@@ -75,7 +59,6 @@ ImportantInfoItem.defaultProps = {
   danger: false,
   description: '',
   icon: null,
-  link: null,
   size: false,
   path: null,
   title: null
@@ -83,12 +66,11 @@ ImportantInfoItem.defaultProps = {
 
 ImportantInfoItem.propTypes = {
   danger: PropTypes.bool,
-  description: PropTypes.string,
+  description: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   icon: PropTypes.object,
-  link: PropTypes.string,
   path: PropTypes.string,
   size: PropTypes.bool,
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   type: PropTypes.oneOf([TYPES.ROUTE, TYPES.LINK]).isRequired
 };
 

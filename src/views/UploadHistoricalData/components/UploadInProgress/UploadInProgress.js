@@ -1,30 +1,33 @@
 import React from 'react';
-import { withTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Layout, Loader } from '../../../../components';
+import { Layout, Loader, NavLink, T } from '../../../../components';
 import { Name, Paragraph, TextLink } from '../../../../theme/typography';
 import { Information, LoaderWrapper } from './UploadInProgress.styled';
-import Routes from '../../../../routes';
 import useUserName from '../../../../hooks/useUserName';
+import { Routes } from '../../../../services/navigationService/routes';
 
-const UploadInProgress = ({ t }) => {
+const UploadInProgress = () => {
   const userName = useUserName();
 
   return (
     <Layout hideBackButton isNavigation>
       <Name>{userName},</Name>
-      <Paragraph>{t('upload_in_progress_text1')}</Paragraph>
+      <Paragraph>
+        <T i18nKey="upload_in_progress_text1" />
+      </Paragraph>
       <LoaderWrapper>
         <Loader />
       </LoaderWrapper>
       <Information>
-        {t('upload_in_progress_text2')}{' '}
-        <Link to={Routes.PrivacyPolicy}>
-          <TextLink>{t('upload_in_progress_text3')}</TextLink>.
-        </Link>
+        <T i18nKey="upload_in_progress_text2" />{' '}
+        <NavLink to={Routes.PrivacyPolicy}>
+          <TextLink>
+            <T i18nKey="upload_in_progress_text3" />
+          </TextLink>
+          .
+        </NavLink>
       </Information>
     </Layout>
   );
 };
 
-export default withTranslation()(UploadInProgress);
+export default UploadInProgress;

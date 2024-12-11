@@ -23,7 +23,7 @@ export const Content = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 0 24px;
+  padding: 0 24px calc(68px + env(safe-area-inset-bottom));
   flex: 1;
 `;
 
@@ -34,6 +34,9 @@ export const LogoWrapper = styled.h1`
   align-items: center;
   width: 100%;
   margin: auto 0 0;
+  @media (max-width: 330px) {
+    height: 22%;
+  }
 `;
 
 export const Logo = styled(LogoSVG)`
@@ -41,6 +44,9 @@ export const Logo = styled(LogoSVG)`
   max-width: 302px;
   ${DEVICE.XS} {
     max-height: 120px;
+  }
+  @media (max-width: 330px) {
+    height: 100% !important;
   }
   ${({ change }) =>
     change &&
@@ -60,6 +66,12 @@ export const Subtitle = styled.p`
     margin-top: 28px;
     margin-bottom: 28px;
     font-size: 16px;
+    line-height: 20px;
+  }
+  @media (max-width: 330px) {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
     line-height: 20px;
   }
   ${({ change }) =>
@@ -93,6 +105,10 @@ export const Label = styled.div`
     font-size: 16px;
     line-height: 22px;
   }
+  @media (max-width: 330px) {
+    font-size: 14px;
+    line-height: 20px;
+  }
 `;
 
 export const Info = styled.span`
@@ -107,12 +123,14 @@ export const Info = styled.span`
   ${DEVICE.XS} {
     margin-bottom: 24px;
   }
+  @media (max-width: 330px) {
+    font-size: 14px;
+    line-height: 20px;
+  }
 `;
 
 export const Footer = styled(GovFooter)`
-  max-width: 375px;
-  padding-bottom: calc(32px + constant(safe-area-inset-bottom));
-  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  background-color: transparent;
 `;
 
 export const Button = styled.button`
@@ -135,4 +153,7 @@ export const Button = styled.button`
   background: #ffffff;
   cursor: pointer;
   font-family: 'Open Sans', sans-serif;
+  @media (max-width: 330px) {
+    margin-top: 20px;
+  }
 `;

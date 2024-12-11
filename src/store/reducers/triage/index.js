@@ -1,34 +1,35 @@
 import moment from 'moment';
 import {
-  TRIAGE_FETCH_REQUESTED,
   TRIAGE_FETCH_SUCCESS,
   TIME_OF_CONFIRMED_COVID_RESETED,
-  WHOLE_TRIAGE_UPDATED
+  WHOLE_TRIAGE_UPDATED,
+  REVOKE_TOR_STATUS_FINISHED,
+  CONFIRM_MANUAL_COVID_FINISHED,
+  REVOKE_MANUAL_COVID_FINISHED,
 } from '../../types/triage';
 import { UPLOAD_HISTORICAL_DATA_FINISHED } from '../../types/app';
 
 const INITIAL_STATE = {
-  isLoading: false,
   triageLevel: '',
   description: '',
   serious: [],
-  timeOfConfirmedCovid: undefined
+  timeOfConfirmedCovid: undefined,
+  timeOfConfirmedManualCovid: undefined
 };
 
-const obtainTimeOfConfirmedCovid = (result, currentTimeOfConfirmedCovid) => {
-  if (result === 1 && currentTimeOfConfirmedCovid === undefined) {
-    return moment().unix();
-  }
-  return currentTimeOfConfirmedCovid;
+const isCovidOccurs = (state, result) => {
+  const { timeOfConfirmedCovid } = state;
+
+  return result === 1 && timeOfConfirmedCovid === undefined;
+};
+
+const obtainTimeOfConfirmedCovid = state => {
+  const { timeOfConfirmedManualCovid } = state;
+  return timeOfConfirmedManualCovid || moment().unix();
 };
 
 const triageReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
-    case TRIAGE_FETCH_REQUESTED:
-      return {
-        ...state,
-        isLoading: true
-      };
     case TRIAGE_FETCH_SUCCESS:
       return (() => {
         const {
@@ -39,22 +40,23 @@ const triageReducer = (state = INITIAL_STATE, action) => {
           ...state,
           triageLevel: triage_level,
           description,
-          serious,
-          isLoading: false
+          serious
         };
       })();
     case UPLOAD_HISTORICAL_DATA_FINISHED:
       return (() => {
         const { result } = action;
-        const { timeOfConfirmedCovid: currentTimeOfConfirmedCovid } = state;
 
-        const timeOfConfirmedCovid = obtainTimeOfConfirmedCovid(
-          result,
-          currentTimeOfConfirmedCovid
-        );
+        if (isCovidOccurs(state, result)) {
+          return {
+            ...state,
+            timeOfConfirmedCovid: obtainTimeOfConfirmedCovid(state, result),
+            timeOfConfirmedManualCovid: undefined
+          };
+        }
+
         return {
-          ...state,
-          timeOfConfirmedCovid
+          ...state
         };
       })();
     case TIME_OF_CONFIRMED_COVID_RESETED:
@@ -67,6 +69,27 @@ const triageReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         ...data
+      };
+    }
+    case REVOKE_TOR_STATUS_FINISHED: {
+      return {
+        ...state,
+        triageLevel: '',
+        description: '',
+        serious: []
+      };
+    }
+    case CONFIRM_MANUAL_COVID_FINISHED: {
+      const { data } = action;
+      return {
+        ...state,
+        timeOfConfirmedManualCovid: data
+      };
+    }
+    case REVOKE_MANUAL_COVID_FINISHED: {
+      return {
+        ...state,
+        timeOfConfirmedManualCovid: undefined
       };
     }
 

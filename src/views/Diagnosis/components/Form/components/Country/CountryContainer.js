@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useFormikContext } from 'formik';
 import { withTranslation } from 'react-i18next';
 import Country from './Country';
-import { Header } from '../../../../../../components';
+import { Layout, T } from '../../../../../../components';
 import { Container } from '../../Form.styled';
 import { DIAGNOSIS_FORM_FIELDS } from '../../../../diagnosis.constants';
 import { VALUE_ABSENT, VALUE_PRESENT } from '../../../../../../constants';
 import locations from '../../../../../../services/diagnosisLogic/locations';
 
-const CountryContainer = ({ t, onBack, onNext }) => {
+const CountryContainer = ({ onBack, onNext, t }) => {
   const { setFieldValue, values } = useFormikContext();
   const [selectedCountries, setSelectedCountries] = useState([]);
 
@@ -20,11 +20,11 @@ const CountryContainer = ({ t, onBack, onNext }) => {
       .map(({ id, name }) => {
         return {
           id,
-          name: t(name)
+          name: <T i18nKey={name} />
         };
       });
     setSelectedCountries(existingCountries);
-  }, [t, values]);
+  }, [values]);
 
   const availableCountries = (() => {
     return locations.map(value => {
@@ -68,17 +68,11 @@ const CountryContainer = ({ t, onBack, onNext }) => {
   };
 
   return (
-    <>
-      <Header onBackClick={back} />
+    <Layout onBackClick={back}>
       <Container>
-        <Country
-          onChange={change}
-          onNext={next}
-          options={availableCountries}
-          selectedValues={selectedCountries}
-        />
+        <Country onChange={change} onNext={next} options={availableCountries} selectedValues={selectedCountries} />
       </Container>
-    </>
+    </Layout>
   );
 };
 

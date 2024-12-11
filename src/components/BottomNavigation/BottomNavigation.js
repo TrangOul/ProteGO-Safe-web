@@ -1,85 +1,53 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { withTranslation } from 'react-i18next';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { menuItems } from './BottomNavigation.constants';
-import useMenuContext from '../../hooks/useMenuContext';
 import { Container, MenuItem } from './BottomNavigation.styled';
+import useNavigation from '../../hooks/useNavigation';
+import useDelayedAction from '../../hooks/useDelayedAction';
+import { T } from '../index';
+import { setNavigationRoot } from '../../store/actions/navigation';
 
-const BottomNavigation = ({ className, t }) => {
-  const history = useHistory();
-  const location = useLocation();
-  const containerRef = useRef();
+const BottomNavigation = ({ className }) => {
+  const dispatch = useDispatch();
+  const { goTo, route } = useNavigation();
+  const { timeout } = useDelayedAction();
   const [value, setValue] = useState(null);
-  const {
-    setVisible: setMenuVisible,
-    startHiding: hideMenu,
-    visible: menuVisible
-  } = useMenuContext();
 
   useEffect(() => {
-    if (menuVisible) {
-      setValue(menuItems.length - 1);
-    } else {
-      const activeItemIndex = menuItems.findIndex(({ path, disabled }) => {
-        if (location.pathname === path) {
-          return true;
-        }
-        return disabled && path && location.pathname.startsWith(path);
-      });
+    const activeItemIndex = menuItems.findIndex(({ path }) => {
+      return route === path;
+    });
 
-      setValue(activeItemIndex !== -1 ? activeItemIndex : null);
-    }
-  }, [location.pathname, menuVisible]);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      const height = containerRef.current.offsetHeight;
-      containerRef.current.parentNode.style.paddingBottom = `${height + 14}px`;
-    }
-  }, [containerRef]);
+    setValue(activeItemIndex !== -1 ? activeItemIndex : null);
+  }, [route]);
 
   const handleSelectionChange = useCallback(
     (event, newValue) => {
       const menuItem = menuItems[newValue];
-
-      if (!menuItem.openMenu) {
-        history.push(menuItem.path);
-
-        if (menuVisible) {
-          hideMenu();
-        }
-      } else {
-        setMenuVisible(!menuVisible);
-      }
+      dispatch(setNavigationRoot(menuItem.path));
+      timeout(() => goTo(menuItem.path));
     },
     // eslint-disable-next-line
-    [history, menuVisible]
+    []
   );
 
-  const renderMenuItem = ({ id, label, disabled, Icon, panicButton }) => (
+  const renderMenuItem = ({ id, label, disabled, Icon, customButton }) => (
     <MenuItem
       id={id}
       key={label}
-      className={panicButton && 'panic-button'}
-      label={t(label)}
+      className={customButton && 'custom-button'}
+      label={<T i18nKey={label} />}
       disabled={disabled}
       icon={<Icon />}
-      disableRipple
-      panicButton={panicButton}
+      custom={customButton ? 1 : 0}
     />
   );
 
   return (
-    <Container
-      ref={containerRef}
-      value={value}
-      className={className}
-      onChange={handleSelectionChange}
-      showLabels
-    >
+    <Container className={className} onChange={handleSelectionChange} showLabels value={value}>
       {menuItems.map(renderMenuItem)}
     </Container>
   );
 };
 
-export default withTranslation()(BottomNavigation);
+export default BottomNavigation;

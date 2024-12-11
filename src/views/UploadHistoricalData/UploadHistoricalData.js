@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Redirect, useHistory } from 'react-router-dom';
-import { withTranslation } from 'react-i18next';
 import { UploadData } from './components/UploadData';
-import {
-  endUploadHistoricalData,
-  uploadHistoricalData
-} from '../../store/actions/nativeData';
+import { endUploadHistoricalData, uploadHistoricalData } from '../../store/actions/nativeData';
 import UploadInProgress from './components/UploadInProgress/UploadInProgress';
 import useSupportExposureNotificationTracing from '../../hooks/useSupportExposureNotificationTracing';
 import { UploadSuccess } from './components/UploadSuccess';
-import { getBanData, createErrorMessage } from './helpers/BanPinTries';
+import { T } from '../../components';
+import banPinTries from '../../services/banPinTries';
 import { UPLOAD_HISTORICAL_DATA_STATE as uploadState } from '../../store/reducers/app/app.constants';
-import Routes from '../../routes';
-import { getUploadHistoricalDataStateErrorMessageVisible } from '../../store/selectors/app';
+import {
+  getUploadHistoricalDataStateErrorMessageVisible,
+  getWarningInEuropeTermState
+} from '../../store/selectors/app';
 import { hideUploadHistoricalDataErrorMessage } from '../../store/actions/app';
+import useNavigation from '../../hooks/useNavigation';
+import { Routes } from '../../services/navigationService/routes';
+import { NavigationBackGuard } from '../../components/NavigationBackGuard';
+import { UPLOAD_DATA } from '../../services/banPinTries/pin.types';
 
-const UploadHistoricalData = ({ t }) => {
+const UploadHistoricalData = () => {
+  const { goTo, goBack, getParam } = useNavigation();
   const { areEnableAllServices } = useSupportExposureNotificationTracing();
   const MAX_UPLOAD_TIME = 60;
   const dispatch = useDispatch();
-  const history = useHistory();
   const { name: userName } = useSelector(state => state.user);
-  const errorMessageVisible = useSelector(
-    getUploadHistoricalDataStateErrorMessageVisible
-  );
+  const isInteroperabilityEnabled = useSelector(getWarningInEuropeTermState);
+  const errorMessageVisible = useSelector(getUploadHistoricalDataStateErrorMessageVisible);
   const {
     uploadHistoricalDataState: { status, date, unsuccessfulAttempts } = {
       status: uploadState.EMPTY,
@@ -32,13 +33,21 @@ const UploadHistoricalData = ({ t }) => {
     }
   } = useSelector(state => state.app);
 
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState(getParam('pin') || '');
   const [banData, setBanData] = useState(null);
+  const [showBackGuard, setShowBackGuard] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
+    if (!areEnableAllServices) {
+      goTo(Routes.Home);
+    }
+    // eslint-disable-next-line
+  }, [areEnableAllServices]);
+
+  useEffect(() => {
     if (unsuccessfulAttempts) {
-      const banInfo = getBanData(unsuccessfulAttempts);
+      const banInfo = banPinTries.getBanData(unsuccessfulAttempts);
       setBanData(banInfo);
     }
   }, [unsuccessfulAttempts]);
@@ -46,7 +55,7 @@ const UploadHistoricalData = ({ t }) => {
   useEffect(() => {
     if (banData && banData.lockdownTime) {
       const timer = setTimeout(() => {
-        setBanData(getBanData(unsuccessfulAttempts));
+        setBanData(banPinTries.getBanData(unsuccessfulAttempts));
       }, banData.lockdownTime);
       return () => clearTimeout(timer);
     }
@@ -66,10 +75,7 @@ const UploadHistoricalData = ({ t }) => {
   }, [date]);
 
   const uploadData = () => {
-    const data = {
-      pin
-    };
-    dispatch(uploadHistoricalData(data));
+    dispatch(uploadHistoricalData(pin, isInteroperabilityEnabled));
   };
 
   const hideErrorMessage = () => {
@@ -77,7 +83,21 @@ const UploadHistoricalData = ({ t }) => {
   };
 
   const finishUpload = () => {
-    dispatch(endUploadHistoricalData()).then(history.push(Routes.Home));
+    dispatch(endUploadHistoricalData()).then(goTo(Routes.Home));
+  };
+
+  const handleBack = () => {
+    if (pin && pin.toString().length) {
+      setShowBackGuard(true);
+      return;
+    }
+    goBack();
+  };
+
+  const backOnGuard = () => {
+    setPin(undefined);
+    setShowBackGuard(false);
+    goBack();
   };
 
   if (status === uploadState.REQUESTED && isUploading) {
@@ -89,31 +109,34 @@ const UploadHistoricalData = ({ t }) => {
   }
   const getErrorMessage = () => {
     if (status === uploadState.DENIED) {
-      return t('upload_data_text4');
+      return null;
     }
-    return (
-      banData && createErrorMessage(banData, unsuccessfulAttempts.length, t)
-    );
+    return banData && banPinTries.createErrorMessage(banData, unsuccessfulAttempts.length, UPLOAD_DATA);
   };
   return (
     <>
-      {areEnableAllServices ? (
-        <UploadData
-          disableButton={status === uploadState.REQUESTED}
-          disablePinInput={Boolean(banData && banData.lockdownTime)}
-          errorMessage={getErrorMessage()}
-          errorMessageVisible={errorMessageVisible}
-          hideErrorMessage={hideErrorMessage}
-          onUploadData={uploadData}
-          pin={pin}
-          setPin={setPin}
-          userName={userName}
+      <UploadData
+        disableButton={status === uploadState.REQUESTED}
+        disablePinInput={Boolean(banData && banData.lockdownTime)}
+        errorMessage={getErrorMessage()}
+        errorMessageVisible={errorMessageVisible}
+        handleBack={handleBack}
+        hideErrorMessage={hideErrorMessage}
+        onUploadData={uploadData}
+        pin={pin}
+        setPin={setPin}
+        userName={userName}
+      />
+      {showBackGuard && (
+        <NavigationBackGuard
+          title={<T i18nKey="lab_test_text23" />}
+          description={<T i18nKey="lab_test_text24" />}
+          handleCancel={() => setShowBackGuard(false)}
+          handleConfirm={() => backOnGuard()}
         />
-      ) : (
-        <Redirect to={Routes.Home} />
       )}
     </>
   );
 };
 
-export default withTranslation()(UploadHistoricalData);
+export default UploadHistoricalData;

@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useFormikContext } from 'formik';
-import { withTranslation } from 'react-i18next';
-import {
-  Button,
-  FieldSet,
-  Header,
-  Radio,
-  Tooltip
-} from '../../../../../../components';
+import { Button, FieldSet, Radio, Tooltip, Layout, T } from '../../../../../../components';
 import { Title } from '../../../../Diagnosis.styled';
 
 import { VALUE_ABSENT, VALUE_PRESENT } from '../../../../../../constants';
@@ -16,7 +9,7 @@ import { questionPropType } from '../../../../prop-types';
 import { DIAGNOSIS_FORM_FIELDS } from '../../../../diagnosis.constants';
 import { Container } from '../../Form.styled';
 
-const Single = ({ t, onBack, onNext, question }) => {
+const Single = ({ onBack, onNext, question }) => {
   const { setFieldValue, values } = useFormikContext();
   const [answers, setAnswers] = useState([]);
 
@@ -68,14 +61,11 @@ const Single = ({ t, onBack, onNext, question }) => {
   };
 
   return (
-    <>
-      <Header onBackClick={back} />
+    <Layout id="view-diagnosis" onBackClick={back} hideBell>
       <Container>
         <Title explanation={explanation}>
-          {t(text)}
-          {explanation && (
-            <Tooltip sticky title={t(text)} content={t(explanation)} />
-          )}
+          <T i18nKey={text} />
+          {explanation && <Tooltip sticky title={<T i18nKey={text} />} content={<T i18nKey={explanation} />} />}
         </Title>
         <FieldSet>
           {choices.map(item => {
@@ -86,18 +76,14 @@ const Single = ({ t, onBack, onNext, question }) => {
                 checked={isSelect(id)}
                 name={id}
                 onChange={() => handleChange(id)}
-                label={t(label)}
+                label={<T i18nKey={label} />}
               />
             );
           })}
         </FieldSet>
-        <Button
-          disabled={!someSelected}
-          onClick={next}
-          label={t('button_next')}
-        />
+        <Button disabled={!someSelected} onClick={next} label={<T i18nKey="button_next" />} />
       </Container>
-    </>
+    </Layout>
   );
 };
 
@@ -105,4 +91,4 @@ Single.propTypes = {
   question: questionPropType
 };
 
-export default withTranslation()(Single);
+export default Single;

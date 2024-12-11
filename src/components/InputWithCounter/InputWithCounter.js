@@ -3,17 +3,7 @@ import PropTypes from 'prop-types';
 import { Counter, Error } from './components';
 import * as Styled from './InputWithCounter.styled';
 
-const InputWithCounter = ({
-  error,
-  info,
-  label,
-  max,
-  min,
-  name,
-  onChange,
-  placeholder,
-  value
-}) => {
+const InputWithCounter = ({ error, info, label, max, min, name, onChange, placeholder, value }) => {
   const ref = useRef(null);
   const [margin, setMargin] = useState(null);
 
@@ -26,6 +16,7 @@ const InputWithCounter = ({
     <Styled.InputWithCounter>
       {label && <Styled.Label ref={ref}>{label}</Styled.Label>}
       <Styled.Input
+        data-cy={`input-with-counter-${name}`}
         error={error}
         maxLength={max}
         minLength={min}
@@ -35,7 +26,7 @@ const InputWithCounter = ({
         value={value}
       />
       <Counter count={value ? value.length : 0} limit={max} margin={margin} />
-      {error && <Error text={error} />}
+      {error && <Error id={`input-with-counter-error-${name}`} text={error} />}
 
       {info && <Styled.Information>{info}</Styled.Information>}
     </Styled.InputWithCounter>
@@ -56,7 +47,7 @@ InputWithCounter.defaultProps = {
 
 InputWithCounter.propTypes = {
   error: PropTypes.string,
-  info: PropTypes.string,
+  info: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   label: PropTypes.string,
   max: PropTypes.number,
   min: PropTypes.number,

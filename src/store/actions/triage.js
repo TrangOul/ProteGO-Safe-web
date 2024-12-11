@@ -1,10 +1,7 @@
+import moment from 'moment';
 import * as types from '../types/triage';
-import { getTriage } from '../../services/diagnosisLogic/triageLogic';
+import { getTriage, getTriageDataByTriageLevel } from '../../services/diagnosisLogic/triageLogic';
 import { firstDiagnosisFinished } from './app';
-
-export const triageFetchRequested = () => ({
-  type: types.TRIAGE_FETCH_REQUESTED
-});
 
 export const triageFetchSuccess = ({ data }) => ({
   data,
@@ -12,7 +9,6 @@ export const triageFetchSuccess = ({ data }) => ({
 });
 
 export const fetchTriage = data => async dispatch => {
-  dispatch(triageFetchRequested());
   dispatch(firstDiagnosisFinished());
   const result = getTriage(data);
   dispatch(triageFetchSuccess({ data: result }));
@@ -34,4 +30,34 @@ export const wholeTriageUpdated = data => ({
 
 export const updateWholeTriage = data => dispatch => {
   dispatch(wholeTriageUpdated(data));
+};
+
+export const revokeTorStatusFinished = () => ({
+  type: types.REVOKE_TOR_STATUS_FINISHED
+});
+
+export const revokeTorStatus = () => dispatch => {
+  dispatch(revokeTorStatusFinished());
+};
+
+export const confirmManualCovidFinished = () => ({
+  data: moment().unix(),
+  type: types.CONFIRM_MANUAL_COVID_FINISHED
+});
+
+export const confirmManualCovid = () => dispatch => {
+  dispatch(confirmManualCovidFinished());
+};
+
+export const revokeManualCovidFinished = () => ({
+  type: types.REVOKE_MANUAL_COVID_FINISHED
+});
+
+export const revokeManualCovid = () => dispatch => {
+  dispatch(revokeManualCovidFinished());
+};
+
+export const setLowTriageLevel = () => dispatch => {
+  const data = getTriageDataByTriageLevel('no_risk');
+  dispatch(triageFetchSuccess({ data }));
 };

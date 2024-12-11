@@ -4,6 +4,95 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 4.13.0
+
+### Added
+- Added support for deep links directly to the STOP COVID ProteGO Safe application
+- Added information about the need to remain in quarantine after signing up for a COVID-19 laboratory test
+- Users can now receive their PIN codes via text messages, the sending of which can be initiated in the app itself
+
+### Changed
+- Improved transparency of the displayed data on COVID-19 and vaccination statistics
+- Visual changes to the home screen in case of contact with a person with COVID-19
+
+## 4.12.0
+
+### Added
+- Implementation of an automatic change of the Risk Assessment Test status to Low Risk 10 days after the last completion
+- more COVID-19 statistics in Poland
+
+### Changed
+- Improved transparency of the displayed data on COVID-19 and vaccination statistics
+- Changes to the content of messages that are displayed when the PIN code is incorrect
+
+### Fixed
+- Corrected error that occurred in rare cases when entering the PIN code
+
+## 4.11.0
+
+### Changed
+- Changes in pathway to sign up for a medical test for COVID-19,
+
+### Fixed
+- Fixed bugs in detailed COVID-19 and vaccination statistics.
+
+## 4.10.0
+
+### Added
+- vaccination statistics
+- more COVID-19 statistics in Poland
+
+### Fixed
+- source of isTriageEnLow and isTriageTorLow
+
+## 4.9.1
+
+### Added
+- vaccination statistics for Poland
+
+### Changed
+- tab "How does the application work?"
+
+## Fixed
+- error of double notification entry in notification history
+
+## 4.9.0
+
+### Added
+- Information on COVID-19 statistics in Poland
+- History of application activity (information about performed checks, indicated threats, system notifications)
+- Possibility of redirecting to a specific application screen by system notification
+- Possibility to evaluate applications in the Google Play / Apple App Store
+- New translations of the application into Russian, German and Turki
+- Information about the checks carried out by the application on meetings with people who reported to have got sick with COVID-19
+
+### Changed
+- New design of the main screen: Shortcuts have been added to make it easier to send the PIN and complete the risk assessment test, the design of the main screen has been refreshed,
+
+## 4.8.0
+
+### Added
+- Integration with EFGS
+
+## 4.7.1
+
+### Added
+- Possibility to enter the result of the laboratory test after being signed up for it in the application.
+- Redirection to chatbot which enables making comments and reporting bugs in the Polish language version.
+
+## 4.7.0
+
+### Added
+- allowing to perform a COVID-19 laboratory test for people with COVID-19 symptoms after the application notified about a high risk of contact with a person tested positive for COVID-19
+- instruction for the feature of following the zones on the screen with a list of poviats
+
+### Changed
+- subpage "How does the application work?"
+- Terms & Conditions and Privacy Policy
+
+### Fixed
+- save Health Metric
+
 ## 4.6.0
 
 ### Added

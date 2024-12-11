@@ -2,24 +2,24 @@ import React from 'react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { withTranslation } from 'react-i18next';
 import { saveUser } from '../../store/actions/user';
 import * as constants from '../../constants';
 import { chronicSickValues } from '../../constants';
-import Routes from '../../routes';
 import useLoaderContext from '../../hooks/useLoaderContext';
 import { ImprintFiller } from '../../components/ImprintFiller';
 import { userNameValidationSchema } from '../../utils/user';
+import useNavigation from '../../hooks/useNavigation';
+import { revokeEnStatus } from '../../store/actions/nativeData';
+import { revokeManualCovid, revokeTorStatus } from '../../store/actions/triage';
+import { Routes } from '../../services/navigationService/routes';
 
 const UserDataChange = ({ t }) => {
+  const { goTo } = useNavigation();
   const dispatch = useDispatch();
-  const history = useHistory();
   const { setLoader } = useLoaderContext();
-  const { bloodGroup, chronicSicks, name, smokeNumber } = useSelector(
-    state => state.user
-  );
+  const { bloodGroup, chronicSicks, name, smokeNumber } = useSelector(state => state.user);
 
   const filledChronicsSicks = (() => {
     if (chronicSicks === undefined) {
@@ -29,13 +29,9 @@ const UserDataChange = ({ t }) => {
     chronicSicks.forEach(_obj => {
       const { name: filledName, description: filledDescription } = _obj;
       filledChronicsSicksToReturn[filledName] = true;
-      const foundedChronicsSick = chronicSickValues.find(
-        value => value.field === filledName
-      );
+      const foundedChronicsSick = chronicSickValues.find(value => value.field === filledName);
       if (foundedChronicsSick && filledDescription) {
-        filledChronicsSicksToReturn[
-          foundedChronicsSick.description
-        ] = filledDescription;
+        filledChronicsSicksToReturn[foundedChronicsSick.description] = filledDescription;
       }
     });
     return filledChronicsSicksToReturn;
@@ -52,9 +48,7 @@ const UserDataChange = ({ t }) => {
     if (chronicSicks === undefined) {
       return undefined;
     }
-    return chronicSicks.length === 0
-      ? constants.VALUE_IS_CHRONIC_SICK_NO
-      : constants.VALUE_IS_CHRONIC_SICK_YES;
+    return chronicSicks.length === 0 ? constants.VALUE_IS_CHRONIC_SICK_NO : constants.VALUE_IS_CHRONIC_SICK_YES;
   })();
 
   const initialValues = {
@@ -63,7 +57,7 @@ const UserDataChange = ({ t }) => {
     [constants.FIELD_SMOKE]: smoke,
     [constants.FIELD_SMOKE_NUMBER]: smokeNumber,
     [constants.FIELD_IS_CHRONIC_SICK]: isChronicSick,
-    step: 1,
+    [constants.FIELD_MANUAL_COVID]: true,
     ...filledChronicsSicks
   };
 
@@ -87,13 +81,28 @@ const UserDataChange = ({ t }) => {
       isSmoking: form[constants.FIELD_SMOKE] === t('yes')
     };
 
-    const goHome = () => {
+    const goToHome = revoke => {
       setLoader(true);
-      setTimeout(() => setLoader(false), 1000);
-      history.push(Routes.Home);
+      setTimeout(() => {
+        goTo(Routes.Home);
+        if (revoke) {
+          dispatch(revokeTorStatus());
+          dispatch(revokeManualCovid());
+        }
+        setLoader(false);
+      }, 1000);
     };
 
-    dispatch(saveUser(data)).then(goHome);
+    if (form[constants.FIELD_MANUAL_COVID] === false) {
+      dispatch(saveUser(data)).then(() =>
+        dispatch(revokeEnStatus()).then(() => {
+          goToHome(true);
+        })
+      );
+      return;
+    }
+
+    dispatch(saveUser(data)).then(() => goToHome(false));
   };
 
   return (

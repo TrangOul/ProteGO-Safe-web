@@ -21,7 +21,7 @@ yarn test a
 ### Run application locally
 ```shell script
 git update-index --skip-worktree src/locales/resources.j (once)
-yarn prepare-tranlations
+yarn prepare-translations
 yarn install
 yarn start
 ```
@@ -31,6 +31,3 @@ yarn start
 
 ## Debug
 When application is running as WebView you can debug in chrome at chrome://inspect/#devices
-
-## Documentation
-[Native bridge](doc/nativeBridge.md)
